@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { Add, Download, LocalPrintshop, Delete, ExpandMore } from '@mui/icons-material';
 
-function ExerciseLabeler() {
+function ExerciseDataCollector() {
     const [youtubeUrl, setYoutubeUrl] = useState('');
     const [youtubeUrlError, setYoutubeUrlError] = useState('');
     const [exerciseType, setExerciseType] = useState('Bench Press');
@@ -257,4 +257,4 @@ function ExerciseLabeler() {
     );
 }
 
-export default ExerciseLabeler;
+export default ExerciseDataCollector;

@@ -1,9 +1,9 @@
-import ExerciseLabeler from './components/ExerciseLabeler';
+import ExerciseDataCollector from './components/ExerciseDataCollector';
 
 function App() {
   return (
     <div>
-      <ExerciseLabeler />
+      <ExerciseDataCollector />
     </div>
   );
 }
