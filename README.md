@@ -1,4 +1,4 @@
-# Exercise Labeler
+# Exercise Collector
 
 ![screenshot](https://raw.githubusercontent.com/rohankatakam/exerciselabeler/main/screenshot.png)
 
