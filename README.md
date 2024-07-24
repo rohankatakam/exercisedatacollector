@@ -1,5 +1,7 @@
 # Exercise Labeler
 
+![screenshot](https://raw.githubusercontent.com/rohankatakam/exerciselabeler/main/screenshot.png)
+
 ## Run
-### `npm install`
-### `npm start`
+1. `npm install`
+2. `npm start`
