@@ -10,9 +10,13 @@ import {
     MenuItem,
     Select,
     InputLabel,
-    FormControl
+    FormControl,
+    IconButton,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails
 } from '@mui/material';
-import { Add, Download, LocalPrintshop } from '@mui/icons-material';
+import { Add, Download, LocalPrintshop, Delete, ExpandMore } from '@mui/icons-material';
 
 function ExerciseLabeler() {
     const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -65,8 +69,23 @@ function ExerciseLabeler() {
         setSets(newSets);
     };
 
+    const deleteRep = (setIndex, repIndex) => {
+        const newSets = sets.map((set, sIndex) => {
+            if (sIndex === setIndex) {
+                return set.filter((_, rIndex) => rIndex !== repIndex);
+            }
+            return set;
+        });
+        setSets(newSets);
+    };
+
     const addSet = () => {
         setSets([...sets, [{ start: '', end: '' }]]);
+    };
+
+    const deleteSet = (setIndex) => {
+        const newSets = sets.filter((_, sIndex) => sIndex !== setIndex);
+        setSets(newSets);
     };
 
     const parseTimestamp = (timestamp) => {
@@ -104,7 +123,6 @@ function ExerciseLabeler() {
         const data = { youtube_url: youtubeUrl, exercise_type: exerciseType, exercise_data: exerciseData };
         console.log('Data submitted:', data);
         return data;
-        // Here you can handle data submission, e.g., save to local storage or send to an API.
     };
 
     const handleDownloadJson = () => {
@@ -169,34 +187,51 @@ function ExerciseLabeler() {
                     </Paper>
                     <Paper sx={{ p: 2, flex: 1, overflowY: 'auto' }}>
                         {sets.map((set, setIndex) => (
-                            <Box key={setIndex} sx={{ mb: 2 }}>
-                                <Typography variant="subtitle1">Set {setIndex + 1}</Typography>
-                                {set.map((rep, repIndex) => (
-                                    <Box key={repIndex} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                        <TextField
-                                            label={`Rep ${repIndex + 1} Start Time`}
-                                            value={rep.start}
-                                            onChange={(e) => handleRepChange(setIndex, repIndex, 'start', e.target.value)}
-                                            sx={{ mr: 1 }}
-                                            placeholder="minute:second"
-                                            inputProps={{ pattern: "^([0-5]?[0-9]):([0-5][0-9])$" }}
-                                        />
-                                        <TextField
-                                            label={`Rep ${repIndex + 1} End Time`}
-                                            value={rep.end}
-                                            onChange={(e) => handleRepChange(setIndex, repIndex, 'end', e.target.value)}
-                                            placeholder="minute:second"
-                                            inputProps={{ pattern: "^([0-5]?[0-9]):([0-5][0-9])$" }}
-                                        />
-                                    </Box>
-                                ))}
-                                <Button
-                                    startIcon={<Add />}
-                                    onClick={() => addRep(setIndex)}
+                            <Accordion key={setIndex} sx={{ mb: 2 }}>
+                                <AccordionSummary
+                                    expandIcon={<ExpandMore />}
+                                    aria-controls={`panel${setIndex}-content`}
+                                    id={`panel${setIndex}-header`}
                                 >
-                                    Add Rep
-                                </Button>
-                            </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                                        <Typography>Set {setIndex + 1}</Typography>
+                                        <IconButton onClick={() => deleteSet(setIndex)} size="small">
+                                            <Delete />
+                                        </IconButton>
+                                    </Box>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    {set.map((rep, repIndex) => (
+                                        <Box key={repIndex} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                            <TextField
+                                                label={`Rep ${repIndex + 1} Start Time`}
+                                                value={rep.start}
+                                                onChange={(e) => handleRepChange(setIndex, repIndex, 'start', e.target.value)}
+                                                sx={{ mr: 1 }}
+                                                placeholder="minute:second"
+                                                inputProps={{ pattern: "^([0-5]?[0-9]):([0-5][0-9])$" }}
+                                            />
+                                            <TextField
+                                                label={`Rep ${repIndex + 1} End Time`}
+                                                value={rep.end}
+                                                onChange={(e) => handleRepChange(setIndex, repIndex, 'end', e.target.value)}
+                                                placeholder="minute:second"
+                                                inputProps={{ pattern: "^([0-5]?[0-9]):([0-5][0-9])$" }}
+                                                sx={{ mr: 1 }}
+                                            />
+                                            <IconButton onClick={() => deleteRep(setIndex, repIndex)} size="small">
+                                                <Delete />
+                                            </IconButton>
+                                        </Box>
+                                    ))}
+                                    <Button
+                                        startIcon={<Add />}
+                                        onClick={() => addRep(setIndex)}
+                                    >
+                                        Add Rep
+                                    </Button>
+                                </AccordionDetails>
+                            </Accordion>
                         ))}
                     </Paper>
                     <Paper sx={{ p: 2 }}>
