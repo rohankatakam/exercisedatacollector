@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
     Container,
     TextField,
@@ -16,7 +16,8 @@ import {
     AccordionSummary,
     AccordionDetails
 } from '@mui/material';
-import { Add, Download, LocalPrintshop, Delete, ExpandMore } from '@mui/icons-material';
+import { Add, Download, LocalPrintshop, Delete, ExpandMore, PlayArrow } from '@mui/icons-material';
+import YouTube from 'react-youtube';
 
 function ExerciseDataCollector() {
     const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -24,6 +25,7 @@ function ExerciseDataCollector() {
     const [exerciseType, setExerciseType] = useState('Bench Press');
     const [sets, setSets] = useState([[{ start: '', end: '' }]]);
     const [videoId, setVideoId] = useState('');
+    const playerRef = useRef(null);
 
     const handleUrlChange = (e) => {
         const url = e.target.value;
@@ -140,6 +142,44 @@ function ExerciseDataCollector() {
         }
     };
 
+    const playClipsInSequence = () => {
+        const player = playerRef.current.getInternalPlayer();
+        let currentSetIndex = 0;
+        let currentRepIndex = 0;
+
+        const playNextRep = () => {
+            if (currentSetIndex < sets.length && currentRepIndex < sets[currentSetIndex].length) {
+                const rep = sets[currentSetIndex][currentRepIndex];
+                const startTime = toSeconds(rep.start);
+                const endTime = toSeconds(rep.end);
+
+                player.seekTo(startTime, true);
+                player.playVideo();
+
+                const checkTime = () => {
+                    player.getCurrentTime().then(currentTime => {
+                        if (currentTime >= endTime) {
+                            player.pauseVideo();
+                            currentRepIndex++;
+                            if (currentRepIndex >= sets[currentSetIndex].length) {
+                                currentSetIndex++;
+                                currentRepIndex = 0;
+                            }
+                            playNextRep();
+                        } else {
+                            setTimeout(checkTime, 100);
+                        }
+                    });
+                };
+
+                setTimeout(checkTime, 100);
+            }
+        };
+
+        playNextRep();
+    };
+
+
     return (
         <Container maxWidth={false} sx={{ height: '100vh' }}>
             <Grid container spacing={2} sx={{ height: '100%' }}>
@@ -154,17 +194,18 @@ function ExerciseDataCollector() {
                             error={!!youtubeUrlError}
                             helperText={youtubeUrlError}
                         />
-                        <Box sx={{ flex: 1 }}>
+                        <Box sx={{ flex: 1, height: '100%' }}>
                             {videoId && (
-                                <iframe
-                                    width="100%"
-                                    height="100%"
-                                    src={`https://www.youtube.com/embed/${videoId}`}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                    title="YouTube Video"
-                                ></iframe>
+                                <YouTube
+                                    videoId={videoId}
+                                    ref={playerRef}
+                                    opts={{
+                                        height: '100%',
+                                        width: '100%',
+                                        playerVars: { autoplay: 0 }
+                                    }}
+                                    style={{ height: '100%', width: '100%' }}
+                                />
                             )}
                         </Box>
                     </Paper>
@@ -243,12 +284,16 @@ function ExerciseDataCollector() {
                             >
                                 Add Set
                             </Button>
-                            <Button variant="outlined" startIcon={<Download />} onClick={handleDownloadJson}>
+                            <Button variant="outlined" startIcon={<PlayArrow />} onClick={playClipsInSequence}>
+                                Play Clips
+                            </Button>
+                            <Button variant="outlined" color="success" startIcon={<Download />} onClick={handleDownloadJson}>
                                 Download JSON
                             </Button>
-                            <Button variant="outlined" startIcon={<LocalPrintshop />} onClick={handleSubmit}>
+                            <Button variant="outlined" color="secondary" startIcon={<LocalPrintshop />} onClick={handleSubmit}>
                                 Console Log
                             </Button>
+
                         </Box>
                     </Paper>
                 </Grid>
